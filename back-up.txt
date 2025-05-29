@@ -1,0 +1,75 @@
+import csv
+import os
+
+# Lista com caminhos dos arquivos das turmas
+caminhos = [
+    "C:/Users/Matheus Carvalho/Downloads/notas/turma_1.csv",
+    "C:/Users/Matheus Carvalho/Downloads/notas/turma_2.csv",  
+    "C:/Users/Matheus Carvalho/Downloads/notas/turma_3.csv", 
+    "C:/Users/Matheus Carvalho/Downloads/notas/turma_4.csv", 
+    "C:/Users/Matheus Carvalho/Downloads/notas/turma_5.csv", 
+]
+
+caminhoTXT = "C:/Users/Matheus Carvalho/Downloads/notas/resultado.txt"
+
+# Abrir o arquivo de resultado para escrita
+with open(caminhoTXT, "w", encoding="utf-8") as resultado:
+
+    for caminho in caminhos:
+        with open(caminho, "r", encoding="utf-8") as arquivo:
+            leitor1 = csv.reader(arquivo)
+
+            # Ler dados iniciais
+            cabecalho = next(leitor1)
+            cod_turma = cabecalho[0].strip()
+            nome_disciplina = cabecalho[1].strip()
+
+            # Ler dados da segunda linha
+            config = next(leitor1)
+            media_minima = float(config[0].strip())
+            peso_av1 = int(config[1].strip())
+            peso_av2 = int(config[2].strip())
+            peso_av3 = int(config[3].strip())
+
+            soma_pesos = peso_av1 + peso_av2 + peso_av3
+
+            # Lista para armazenar as médias dos alunos por disciplina
+            medias_alunos = []
+
+            total_alunos = 0
+            total_aprovados = 0
+
+            # Ler dados dos alunos
+           
+            for linha in leitor1:
+                total_alunos += 1
+
+                matricula = linha[0].strip()
+                av1 = float(linha[1].strip())
+                av2 = float(linha[2].strip())
+                av3 = float(linha[3].strip())
+
+                media = (av1 * peso_av1 + av2 * peso_av2 + av3 * peso_av3) / soma_pesos
+                medias_alunos.append(media)
+
+                if media >= media_minima:
+                    total_aprovados += 1
+
+            # Calcular estatísticas da turma
+            media_turma = sum(medias_alunos) / total_alunos if total_alunos > 0 else 0
+            alunos_acima_media = sum(1 for m in medias_alunos if m > media_turma)
+
+            maior_media = max(medias_alunos) if medias_alunos else 0
+            menor_media = min(medias_alunos) if medias_alunos else 0
+
+            percentual_aprovados = (total_aprovados / total_alunos) * 100 if total_alunos > 0 else 0
+
+            # Escrever no arquivo de resultado
+            resultado.write(f"TURMA: {cod_turma} - {nome_disciplina}\n")
+            resultado.write(f"a) Total de alunos: {total_alunos}, Percentual de aprovados: {percentual_aprovados:.2f}%\n")
+            resultado.write(f"b) Média da turma: {media_turma:.2f}, Alunos acima da média: {alunos_acima_media}\n")
+            resultado.write(f"c) Maior média: {maior_media:.2f}, Menor média: {menor_media:.2f}\n")
+            resultado.write("-" * 50 + "\n\n")
+
+print("Arquivo 'resultado.txt' gerado com sucesso!")
+os.startfile(caminhoTXT)
