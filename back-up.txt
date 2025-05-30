@@ -1,21 +1,33 @@
+from pathlib import Path
 import csv
 import os
+from tkinter import Tk, filedialog
 
-# Lista com caminhos dos arquivos das turmas
-caminhos = [
-    "C:/Users/Matheus Carvalho/Downloads/notas/turma_1.csv",
-    "C:/Users/Matheus Carvalho/Downloads/notas/turma_2.csv",  
-    "C:/Users/Matheus Carvalho/Downloads/notas/turma_3.csv", 
-    "C:/Users/Matheus Carvalho/Downloads/notas/turma_4.csv", 
-    "C:/Users/Matheus Carvalho/Downloads/notas/turma_5.csv", 
-]
+# minimiza a janela padrão do tkinter
+Tk().withdraw()  
+# Abrir janela para selecionar a pasta
+pasta = filedialog.askdirectory(title="Selecione a pasta onde estão os CSVs")
 
-caminhoTXT = "C:/Users/Matheus Carvalho/Downloads/notas/resultado.txt"
+if not pasta:
+    raise Exception("Nenhuma pasta foi selecionada") 
+    exit()
 
-# Abrir o arquivo de resultado para escrita
+# Converter para objeto Path
+pasta = Path(pasta)
+
+# Path onde criar e ler o arquivo txt
+caminhoTXT = pasta/"resultado.txt"
+
+# lista com todos os arquivos do path dinâmico
+arquivos_csv = list(pasta.glob("*.csv"))
+
+# Abrir arquivo de resultado para escrita
 with open(caminhoTXT, "w", encoding="utf-8") as resultado:
-
-    for caminho in caminhos:
+    if not arquivos_csv:
+        raise FileNotFoundError("A pasta selecionada não contém arquivos CSV.")
+   
+# Percorrer todos os arquivos CSV da pasta
+    for caminho in arquivos_csv:
         with open(caminho, "r", encoding="utf-8") as arquivo:
             leitor1 = csv.reader(arquivo)
 
@@ -33,14 +45,11 @@ with open(caminhoTXT, "w", encoding="utf-8") as resultado:
 
             soma_pesos = peso_av1 + peso_av2 + peso_av3
 
-            # Lista para armazenar as médias dos alunos por disciplina
+            # Processar alunos
             medias_alunos = []
-
             total_alunos = 0
             total_aprovados = 0
 
-            # Ler dados dos alunos
-           
             for linha in leitor1:
                 total_alunos += 1
 
@@ -55,7 +64,6 @@ with open(caminhoTXT, "w", encoding="utf-8") as resultado:
                 if media >= media_minima:
                     total_aprovados += 1
 
-            # Calcular estatísticas da turma
             media_turma = sum(medias_alunos) / total_alunos if total_alunos > 0 else 0
             alunos_acima_media = sum(1 for m in medias_alunos if m > media_turma)
 
@@ -72,4 +80,4 @@ with open(caminhoTXT, "w", encoding="utf-8") as resultado:
             resultado.write("-" * 50 + "\n\n")
 
 print("Arquivo 'resultado.txt' gerado com sucesso!")
-os.startfile(caminhoTXT)
+os.startfile(caminhoTXT)  
